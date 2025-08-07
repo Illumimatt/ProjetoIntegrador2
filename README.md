@@ -1,6 +1,11 @@
-# ProjetoIntegrador2
+<h3 align="center">projeto.integrador.ii</h3>
+<p align="center"> Repositório dedicado ao desenvolvimento de um jogo eletrônico completo, do conceito ao lançamento </p>
 
-**Repositório dedicado ao desenvolvimento de um jogo eletrônico completo, do conceito ao lançamento.**
+<p align="center">
+  <img src="https://img.shields.io/badge/status-Em%20Planejamento-yellow" alt="Status do Projeto: Em Planejamento">
+  <img src="https://img.shields.io/badge/engine-Unity-black?logo=unity" alt="Game Engine: Unity">
+  <!-- <img src="https://img.shields.io/badge/licen%C3%A7a-MIT-blue" alt="Licença: MIT"> -->
+</p>
 
 ## O que estamos fazendo?
 
@@ -23,21 +28,21 @@ Este projeto representa a ponte entre o conhecimento acadêmico e a experiência
 
 A equipe é formada por um grupo com habilidades complementares, cada um responsável por uma área crucial do desenvolvimento:
 
-| Nome | Funções |
-| :--- | :--- |
-| **Bruno d'Luka** | Programador de Lógica de Jogo e Ferramentas |
-| **Matheus Kollmann** | Game Designer e Gerente de Projeto |
-| **Caroline Machado** | Artista Principal e Designer de Áudio |
-| **Julia Costa** | Programadora de Interface (UI/UX) e Modelista 3D |
+| Nome                                                  | Funções                                          |
+| :---------------------------------------------------- | :----------------------------------------------- |
+| [**Bruno d'Luka**](https://www.github.com/bdlukaa)    | Programador de Lógica de Jogo e Ferramentas      |
+| **Caroline Machado**                                  | Artista Principal e Designer de Áudio            |
+| **Julia Costa**                                       | Programadora de Interface (UI/UX) e Modelista 3D |
+| [**Matheus Kollmann**](https://github.com/Illumimatt) | Game Designer e Gerente de Projeto               |
 
 ## Onde o projeto será desenvolvido e acompanhado?
 
-- **Gestão e Código-fonte:** [GitHub]
+- **Gestão e Código-fonte:** [`GitHub`](https://github.com/Illumimatt/ProjetoIntegrador2)
 - **Game Engine:** Unity
 - **Ferramentas de Desenvolvimento:** Visual Studio Code (VSCode)
 - **Arte e Modelagem 3D:** Blender e Nomad Sculpt
 - **Planejamento e tarefas:** [`Google Drive`](https://drive.google.com/drive/folders/1RwOFW-68JM9Si7ZjIWvBx5EgL9dN5c1B?usp=sharing)
-  
+
 ## Quando serão feitas as entregas principais?
 
 - **Status atual:** Em Planejamento
@@ -47,3 +52,7 @@ A equipe é formada por um grupo com habilidades complementares, cada um respons
 - **Entrega Final (Relatório):** até 17/11/2025
 
 ---
+
+<div align="center">
+    <p>Feito com ❤️ pela equipe do Projeto Integrador</p>
+</div>
