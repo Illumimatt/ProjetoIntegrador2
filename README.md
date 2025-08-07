@@ -36,7 +36,8 @@ A equipe é formada por um grupo com habilidades complementares, cada um respons
 - **Game Engine:** Unity
 - **Ferramentas de Desenvolvimento:** Visual Studio Code (VSCode)
 - **Arte e Modelagem 3D:** Blender e Nomad Sculpt
-
+- **Planejamento e tarefas: [`Google Drive`](https://drive.google.com/drive/folders/1RwOFW-68JM9Si7ZjIWvBx5EgL9dN5c1B?usp=sharing) **
+  
 ## Quando serão feitas as entregas principais?
 
 - **Status atual:** Em Planejamento
