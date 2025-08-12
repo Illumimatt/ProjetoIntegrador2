@@ -47,9 +47,9 @@ A equipe é formada por um grupo com habilidades complementares, cada um respons
 
 - **Status atual:** Em Planejamento
 - **Planejamento:** até 18/08/2025
-- **Protótipos:** até 15/09/2025
-- **Testes:** até 22/09/2025
-- **Entrega Final (Relatório):** até 17/11/2025
+- **Protótipos:** até 15/10/2025
+- **Testes:** até 22/11/2025
+- **Entrega Final (Relatório):** até 01/12/2025
 
 ---
 
