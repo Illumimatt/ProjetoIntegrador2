@@ -42,6 +42,8 @@ A equipe é formada por um grupo com habilidades complementares, cada um respons
 - **Ferramentas de Desenvolvimento:** Visual Studio Code (VSCode)
 - **Arte e Modelagem 3D:** Blender e Nomad Sculpt
 - **Planejamento e tarefas:** [`Google Drive`](https://drive.google.com/drive/folders/1RwOFW-68JM9Si7ZjIWvBx5EgL9dN5c1B?usp=sharing)
+- **Link do PMCanvas:** [`Miro`](https://miro.com/app/board/uXjVJUXGZKc=/?share_link_id=260673801956)
+
 
 ## Quando serão feitas as entregas principais?
 
