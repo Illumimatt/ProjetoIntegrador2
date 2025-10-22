@@ -44,6 +44,39 @@ A equipe é formada por um grupo com habilidades complementares, cada um respons
 - **Planejamento e tarefas:** [`Google Drive`](https://drive.google.com/drive/folders/1RwOFW-68JM9Si7ZjIWvBx5EgL9dN5c1B?usp=sharing)
 - **Link do PMCanvas:** [`Miro`](https://miro.com/app/board/uXjVJUXGZKc=/?share_link_id=260673801956)
 
+## 🏛️ Arquitetura da Aplicação
+
+A arquitetura do "Dekora" segue os padrões de design de software mais comuns para o desenvolvimento de jogos na Unity, primariamente a **Arquitetura Baseada em Componentes** e o **Padrão de Gerenciadores (Singleton)**.
+
+<p align="center">
+  <img src="arquitetura/DiagramaDeClassesDekora.png" alt="Diagrama de Classes da Arquitetura do Dekora" width="800"/>
+  <br/>
+  <sup>Diagrama de Classes da arquitetura do sistema.</sup>
+</p>
+
+A estrutura se divide nas seguintes áreas de responsabilidade:
+
+### 1. Camada de Gerenciamento (Managers)
+Esta é a "espinha dorsal" do sistema. É composta por classes de alto nível que gerenciam o estado do jogo e os sistemas centrais. Utilizamos o padrão Singleton para garantir que exista apenas uma instância dos gerenciadores globais, facilitando o acesso a partir de qualquer ponto do código.
+
+* **`GameManager` (Singleton):** Orquestra o fluxo principal do jogo. Controla o estado (MainMenu, Playing, Paused) e coordena os outros gerenciadores.
+* **`LevelManager`:** Responsável por carregar, descarregar e reiniciar as fases (Level).
+* **`SaveManager`:** Abstrai toda a lógica de salvar e carregar o progresso.
+* **`AudioManager` (Singleton):** Gerencia a reprodução de música e efeitos sonoros.
+
+### 2. Camada de Interface (UI)
+Esta camada é responsável por toda a interação do usuário com os menus e elementos de interface. Ela segue um padrão de Herança para reutilização de código.
+
+* **`UIManager`:** Gerencia quais telas estão ativas.
+* **`UIScreen` (Abstrata):** Uma classe base que define o comportamento padrão de uma tela (Mostrar, Esconder).
+* **`MainMenuScreen`, `SettingsScreen`, etc.:** Implementações concretas que herdam de `UIScreen` e cuidam de botões e sliders específicos.
+
+### 3. Camada de Lógica de Jogo (Gameplay Core)
+Esta camada contém os objetos e sistemas com os quais o jogador interage diretamente. Este é o coração da Arquitetura Baseada em Componentes da Unity.
+
+* **`Level`:** Contém os dados da fase, os objetos e o sistema de grid.
+* **`DecorativeObject`:** Um componente (script) que será anexado a um objeto 3D no jogo. Ele contém a lógica para ser selecionado, arrastado e solto.
+* **`GridSystem`:** Uma classe de lógica auxiliar que fornece a funcionalidade de "snap" ao grid.
 
 ## Quando serão feitas as entregas principais?
 
