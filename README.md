@@ -44,12 +44,12 @@ A equipe é formada por um grupo com habilidades complementares, cada um respons
 - **Planejamento e tarefas:** [`Google Drive`](https://drive.google.com/drive/folders/1RwOFW-68JM9Si7ZjIWvBx5EgL9dN5c1B?usp=sharing)
 - **Link do PMCanvas:** [`Miro`](https://miro.com/app/board/uXjVJUXGZKc=/?share_link_id=260673801956)
 
-## 🏛️ Arquitetura da Aplicação
+## Arquitetura da Aplicação
 
 A arquitetura do "Dekora" segue os padrões de design de software mais comuns para o desenvolvimento de jogos na Unity, primariamente a **Arquitetura Baseada em Componentes** e o **Padrão de Gerenciadores (Singleton)**.
 
 <p align="center">
-  <img src="arquitetura/DiagramaDeClassesDekora.png" alt="Diagrama de Classes da Arquitetura do Dekora" width="800"/>
+  <img src="arquitetura/DiagramaDeClassesDekora.png" alt="Diagrama de Classes da Arquitetura do Dekora" width="1000"/>
   <br/>
   <sup>Diagrama de Classes da arquitetura do sistema.</sup>
 </p>
