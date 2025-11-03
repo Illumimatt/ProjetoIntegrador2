@@ -1,5 +1,5 @@
 <h3 align="center">projeto.integrador.ii</h3>
-<p align="center"> Repositório dedicado ao desenvolvimento de um jogo eletrônico completo, do conceito ao lançamento </p>
+<p align="center"> Este projeto integrador está sendo desenvolvido como parte do curso de Ciência da Computação da Universidade CEUB e tem como objetivo o desenvolvimento de um jogo eletrônico completo, do conceito ao lançamento </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/status-Em%20Planejamento-yellow" alt="Status do Projeto: Em Planejamento">
@@ -37,12 +37,13 @@ Este projeto representa a ponte entre o conhecimento acadêmico e a experiência
 
 A equipe é formada por um grupo com habilidades complementares, cada um responsável por uma área crucial do desenvolvimento:
 
-| Nome                                                  | Funções                                          |
-| :---------------------------------------------------- | :----------------------------------------------- |
-| [**Bruno d'Luka**](https://www.github.com/bdlukaa)    | Programador de Lógica de Jogo e Ferramentas      |
-| **Caroline Machado**                                  | Artista Principal e Designer de Áudio            |
-| **Julia Costa**                                       | Programadora de Interface (UI/UX) e Modelista 3D |
-| [**Matheus Kollmann**](https://github.com/Illumimatt) | Game Designer e Gerente de Projeto               |
+| Nome                                                   | Funções                                          |
+| :----------------------------------------------------  | :----------------------------------------------- |
+| [**Matheus Kollmann**](https://github.com/Illumimatt)  | Game Designer e Gerente de Projeto               |
+| [**Bruno d'Luka**](https://www.github.com/bdlukaa)     | Programador de Lógica de Jogo e Ferramentas      |
+| [**Caroline Machado**](https://github.com/Carololivert)| Artista Principal e Designer de Áudio            |
+| [**Julia Costa**](https://github.com/Juuia)            | Programadora de Interface (UI/UX) e Modelista 3D |
+| [**Celeste Laura**](https://github.com/salvioni)       | Desenvolvedora Híbrida                           |
 
 ## Ferramentas e Tecnologias
 
