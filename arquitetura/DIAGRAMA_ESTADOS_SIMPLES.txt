@@ -1,0 +1,317 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    AUTÔMATO DO DEKORA - DIAGRAMA VISUAL                      ║
+║                         Estados e Transições do Jogo                          ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+                              [INÍCIO DO JOGO]
+                                     │
+                                     │
+                            ┌────────▼────────┐
+                            │ INITIALIZATION  │  Estado: Carregando recursos
+                            │   (Inicial)     │  Time Scale: 1.0
+                            └────────┬────────┘
+                                     │ auto-transição
+                                     │
+                            ┌────────▼────────┐
+                    ┌──────▶│   MAIN MENU     │◀──────┐
+                    │       │                 │       │
+                    │       │ Menu Principal  │       │ voltar de qualquer lugar
+                    │       └────────┬────────┘       │
+                    │                │                │
+                    │           (Jogar)               │
+                    │                │                │
+                    │       ┌────────▼────────┐       │
+                    │       │ LEVEL SELECTION │───────┤
+                    │       │                 │       │
+                    │       │ Escolher Fase   │       │
+                    │       └────────┬────────┘       │
+                    │                │                │
+                    │       (Selecionar Nível)        │
+                    │                │                │
+                    │       ┌────────▼────────┐       │
+                    │       │ LOADING LEVEL   │       │
+                    │       │                 │       │
+                    │       │ Carregando...   │       │
+                    │       └────────┬────────┘       │
+                    │                │                │
+                    │        (Carregamento OK)        │
+                    │                │                │
+                    │       ┌────────▼────────┐       │
+                    │       │    PLAYING      │───────┘ (Sair)
+             (Sair) │       │                 │
+                    │       │ ★ DECORANDO ★   │
+                    │       └───┬───┬────┬────┘
+                    │           │   │    │
+                    │    (Pausar)  │    └──────────┐
+                    │           │   │           (Revisar)
+                    │           │   │               │
+                    │  ┌────────▼───┴────┐   ┌──────▼─────────┐
+                    │  │     PAUSED      │   │  LEVEL REVIEW  │
+                    │  │                 │   │                │
+                    │  │ Jogo Pausado    │   │ Ver Decoração  │
+                    │  │ Time Scale: 0   │   │                │
+                    │  └───┬─────┬───────┘   └──┬──────┬──────┘
+                    │      │     │              │      │
+                    │      │  (Continuar)  (Voltar)    │
+                    │      │     │              │      │
+                    │      │     └──────────────┘      │
+                    │      │                       (Confirmar)
+                    │      │                           │
+                    │  (Config)                        │
+                    │      │                    ┌──────▼──────────┐
+                    │      │                    │ LEVEL COMPLETE  │
+                    │      │                    │                 │
+                    │      │                    │ Nível Completo! │
+                    │      │                    │ Salvar progresso│
+                    │      │                    └──────┬──────────┘
+                    │      │                           │
+                    │      │                    (Próximo/Menu)
+                    │      │                           │
+                    │  ┌───▼────────┐                  │
+                    └──┤  SETTINGS  │◀─────────────────┘
+                       │            │
+                       │Configurar  │
+                       │Audio/Video │
+                       └─────┬──────┘
+                             │
+                          (Fechar) → Retorna ao estado anterior
+                             │
+                             │
+                        ┌────▼─────┐
+                        │ EXITING  │  Estado: Salvando e encerrando
+                        │ (Final)  │  Time Scale: N/A
+                        └────┬─────┘
+                             │
+                             ▼
+                      [FIM DO JOGO]
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                            LEGENDA DOS ESTADOS
+
+═══════════════════════════════════════════════════════════════════════════════
+
+╔═══════════════════╦═══════════════════════════════════════════════════════╗
+║     ESTADO        ║                    DESCRIÇÃO                          ║
+╠═══════════════════╬═══════════════════════════════════════════════════════╣
+║ INITIALIZATION    ║ Carrega recursos iniciais, configs, assets           ║
+║ MAIN MENU         ║ Tela principal - escolher jogar, config ou sair       ║
+║ LEVEL SELECTION   ║ Escolher qual nível/quarto decorar                    ║
+║ LOADING LEVEL     ║ Carregando cena, objetos, texturas                    ║
+║ PLAYING           ║ Jogador está decorando (estado principal)             ║
+║ PAUSED            ║ Jogo pausado - tempo congelado                        ║
+║ LEVEL REVIEW      ║ Modo câmera livre para ver decoração                  ║
+║ LEVEL COMPLETE    ║ Nível finalizado - mostrar estatísticas              ║
+║ SETTINGS          ║ Ajustar volume, gráficos, controles                   ║
+║ EXITING           ║ Salvando e fechando o jogo                            ║
+╚═══════════════════╩═══════════════════════════════════════════════════════╝
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                        TRANSIÇÕES VÁLIDAS (MATRIZ)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+     PARA →  INI  MEN  SEL  LOA  PLA  PAU  REV  COM  SET  EXI
+    DE ↓     
+    ───────────────────────────────────────────────────────────
+    INIT │    ✗    ✓    ✗    ✗    ✗    ✗    ✗    ✗    ✗    ✗
+    MENU │    ✗    ✗    ✓    ✗    ✗    ✗    ✗    ✗    ✓    ✓
+    SEL  │    ✗    ✓    ✗    ✓    ✗    ✗    ✗    ✗    ✗    ✗
+    LOAD │    ✗    ✗    ✗    ✗    ✓    ✗    ✗    ✗    ✗    ✗
+    PLAY │    ✗    ✓    ✗    ✗    ✗    ✓    ✓    ✗    ✗    ✗
+    PAUS │    ✗    ✓    ✗    ✗    ✓    ✗    ✗    ✗    ✓    ✗
+    REV  │    ✗    ✗    ✗    ✗    ✓    ✗    ✗    ✓    ✗    ✗
+    COMP │    ✗    ✓    ✓    ✗    ✗    ✗    ✗    ✗    ✗    ✗
+    SET  │    ✗    *    ✗    ✗    ✗    *    ✗    ✗    ✗    ✗
+    EXIT │    ✗    ✗    ✗    ✗    ✗    ✗    ✗    ✗    ✗    ✗
+    ───────────────────────────────────────────────────────────
+
+    ✓ = Transição permitida
+    ✗ = Transição bloqueada
+    * = Retorna ao estado de origem
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                            FLUXO TÍPICO DO JOGO
+
+═══════════════════════════════════════════════════════════════════════════════
+
+FLUXO 1: Jogar um Nível Completo
+─────────────────────────────────
+1. INITIALIZATION  → (Jogo inicia, carrega configs)
+2. MAIN MENU       → (Jogador vê menu, clica "Jogar")
+3. LEVEL SELECTION → (Escolhe "Quarto 1")
+4. LOADING LEVEL   → (Carrega assets...)
+5. PLAYING         → (Decora o quarto)
+6. LEVEL REVIEW    → (Revisa decoração)
+7. LEVEL COMPLETE  → (Vê estatísticas)
+8. LEVEL SELECTION → (Escolhe próximo nível)
+9. ... repete 4-8
+
+
+FLUXO 2: Pausar e Configurar
+────────────────────────────
+1. PLAYING    → (Está decorando)
+2. PAUSED     → (Aperta ESC)
+3. SETTINGS   → (Ajusta volume)
+4. PAUSED     → (Fecha settings)
+5. PLAYING    → (Continua decorando)
+
+
+FLUXO 3: Desistir de um Nível
+─────────────────────────────
+1. PLAYING    → (Decorando)
+2. PAUSED     → (Pausa)
+3. MAIN MENU  → (Clica "Sair para Menu")
+4. EXITING    → (Clica "Sair do Jogo")
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                            CONTROLES DE TIME
+
+═══════════════════════════════════════════════════════════════════════════════
+
+Estado              Time.timeScale    Descrição
+──────────────────────────────────────────────────────────────────────────────
+INITIALIZATION      1.0               Tempo normal
+MAIN MENU           1.0               Tempo normal (animações de UI)
+LEVEL SELECTION     1.0               Tempo normal
+LOADING LEVEL       1.0               Tempo normal
+PLAYING             1.0               ★ Tempo normal - gameplay ativo
+PAUSED              0.0               ★ Tempo congelado - jogo pausado
+LEVEL REVIEW        1.0               Tempo normal (câmera livre)
+LEVEL COMPLETE      1.0               Tempo normal (UI de conclusão)
+SETTINGS            (mantém anterior) Não altera timeScale
+EXITING             N/A               Aplicação encerrando
+──────────────────────────────────────────────────────────────────────────────
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                        INTEGRAÇÃO COM OUTROS SISTEMAS
+
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────┐
+│  GAMEMANAGER    │ (Orquestra tudo)
+└────────┬────────┘
+         │
+    ┌────┴────┬──────────┬────────────┐
+    │         │          │            │
+    ▼         ▼          ▼            ▼
+┌───────┐ ┌──────┐ ┌─────────┐ ┌──────────┐
+│ LEVEL │ │ SAVE │ │  AUDIO  │ │    UI    │
+│MANAGER│ │MNGR  │ │ MANAGER │ │ MANAGER  │
+└───────┘ └──────┘ └─────────┘ └──────────┘
+
+Estado → Ação nos Managers
+───────────────────────────────────────────────────
+MAIN MENU        → AudioManager.PlayMusic("menu")
+                 → UIManager.ShowScreen(MainMenu)
+
+LEVEL SELECTION  → LevelManager.GetAvailableLevels()
+                 → SaveManager.GetCompletedLevels()
+
+LOADING LEVEL    → LevelManager.LoadLevel(index)
+                 → UIManager.ShowLoadingScreen()
+
+PLAYING          → AudioManager.PlayMusic("gameplay")
+                 → UIManager.ShowGameplayHUD()
+
+LEVEL COMPLETE   → SaveManager.CompleteLevel(index)
+                 → SaveManager.SaveGame()
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                            CÓDIGO EXEMPLO
+
+═══════════════════════════════════════════════════════════════════════════════
+
+// Pausar o jogo
+void Update()
+{
+    if (Input.GetKeyDown(KeyCode.Escape))
+    {
+        if (GameManager.Instance.CurrentState == GameState.Playing)
+            GameManager.Instance.PauseGame();
+        else if (GameManager.Instance.CurrentState == GameState.Paused)
+            GameManager.Instance.ResumeGame();
+    }
+}
+
+// Escutar mudanças de estado
+void Start()
+{
+    GameManager.Instance.OnStateChanged += HandleStateChange;
+}
+
+void HandleStateChange(GameState oldState, GameState newState)
+{
+    Debug.Log($"Estado: {oldState} → {newState}");
+    
+    switch (newState)
+    {
+        case GameState.Playing:
+            // Ativar controles
+            break;
+        case GameState.Paused:
+            // Mostrar menu de pausa
+            break;
+    }
+}
+
+// Iniciar nível
+void OnLevelButtonClick(int levelIndex)
+{
+    LevelManager.Instance.LoadLevel(levelIndex);
+    GameManager.Instance.TransitionToState(GameState.LoadingLevel);
+}
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+                    CHECKLIST DE IMPLEMENTAÇÃO
+
+═══════════════════════════════════════════════════════════════════════════════
+
+CORE:
+  [✓] Enum GameState criado com 10 estados
+  [✓] GameManager implementado com Singleton
+  [✓] Validação de transições funcionando
+  [✓] Eventos OnStateChanged implementados
+  [✓] Métodos Enter/Exit para cada estado
+
+MANAGERS:
+  [✓] LevelManager - carregamento assíncrono
+  [✓] SaveManager - persistência JSON
+  [✓] AudioManager - música e SFX
+
+GAMEPLAY:
+  [✓] Level - representa uma fase
+  [✓] DecorativeObject - drag & drop
+  [✓] GridSystem - snapping de objetos
+
+DOCUMENTAÇÃO:
+  [✓] AUTOMATO_DEKORA.md (completo)
+  [✓] Scripts/README.md (guia de uso)
+  [✓] Scripts/SETUP_GUIDE.md (setup rápido)
+  [✓] AUTOMATO_IMPLEMENTADO.md (resumo)
+  [✓] DIAGRAMA_ESTADOS_SIMPLES.txt (este arquivo)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+Para mais informações, consulte:
+  • arquitetura/AUTOMATO_DEKORA.md (documentação técnica completa)
+  • game/piii/Assets/Scripts/README.md (API e exemplos de uso)
+  • game/piii/Assets/Scripts/SETUP_GUIDE.md (guia de setup passo a passo)
+
+Implementado em: 07/11/2025
+Status: ✅ COMPLETO E FUNCIONAL
+

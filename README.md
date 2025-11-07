@@ -62,6 +62,33 @@ O projeto será desenvolvido e acompanhado com as seguintes ferramentas:
 - **C# (Linguagem):** Como linguagem padrão da Unity, o C# oferece performance, tipagem forte e recursos modernos de programação que facilitam a manutenção do código e a implementação de padrões de design complexos (como Singletons e Máquinas de Estado).
 - **Blender & Nomad Sculpt (Arte):** O Blender é uma ferramenta poderosa e gratuita para modelagem 3D e renderização, enquanto o Nomad Sculpt oferece flexibilidade para a criação de _assets_. A combinação permite um fluxo de trabalho de arte completo e acessível.
 
+## ⚡ Autômato Implementado
+
+O jogo conta com um **autômato finito determinístico (DFA)** completo implementado! 🎉
+
+- ✅ **10 estados** do jogo (Initialization, MainMenu, Playing, Paused, etc.)
+- ✅ **Validação de transições** entre estados
+- ✅ **4 gerenciadores** (Game, Level, Save, Audio) com padrão Singleton
+- ✅ **Sistema de gameplay** completo (Level, DecorativeObject, GridSystem)
+- ✅ **Documentação completa** com mais de 8000 linhas
+
+**📖 Ver documentação completa:** [`arquitetura/AUTOMATO_DEKORA.md`](arquitetura/AUTOMATO_DEKORA.md)  
+**🚀 Guia de setup rápido:** [`game/piii/Assets/Scripts/SETUP_GUIDE.md`](game/piii/Assets/Scripts/SETUP_GUIDE.md)  
+**📝 Resumo da implementação:** [`AUTOMATO_IMPLEMENTADO.md`](AUTOMATO_IMPLEMENTADO.md)
+
+## 🎨 Sistema de Camadas 2.5D
+
+O jogo utiliza um **sistema de camadas** para criar profundidade visual com câmera ortogonal:
+
+- ✅ **6 camadas** configuráveis (Background, Furniture_Back/Mid/Front, Decorations, Floor)
+- ✅ **Câmera ortogonal** com controles de zoom e pan
+- ✅ **Ordenação automática** por posição Y dentro de cada camada
+- ✅ **Snap ao grid** com profundidade Z correta
+- ✅ **Sistema visual** com Gizmos para debugging
+
+**🎨 Documentação do sistema 2.5D:** [`game/piii/Assets/Scripts/LAYER_SYSTEM_GUIDE.md`](game/piii/Assets/Scripts/LAYER_SYSTEM_GUIDE.md)  
+**🔧 Arquitetura técnica:** [`arquitetura/SISTEMA_CAMADAS_2.5D.md`](arquitetura/SISTEMA_CAMADAS_2.5D.md)
+
 ## Arquitetura da Aplicação
 
 A arquitetura do "Dekora" segue os padrões de design de software mais comuns para o desenvolvimento de jogos na Unity, primariamente a **Arquitetura Baseada em Componentes** e o **Padrão de Gerenciadores (Singleton)**.
