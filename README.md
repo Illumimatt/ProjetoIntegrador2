@@ -1,5 +1,5 @@
 <h3 align="center">projeto.integrador.ii</h3>
-<p align="center"> Este projeto integrador está sendo desenvolvido como parte do curso de Ciência da Computação da Universidade CEUB e tem como objetivo o desenvolvimento de um jogo eletrônico completo, do conceito ao lançamento </p>
+<p align="center"> Este projeto integrador está sendo desenvolvido como parte do curso de Ciência da Computação da Universidade CEUB e tem como objetivo o desenvolvimento de um jogo eletrônico, do conceito ao lançamento </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/status-Em%20Planejamento-yellow" alt="Status do Projeto: Em Planejamento">
@@ -10,7 +10,7 @@
 
 ### Objetivo
 
-O objetivo é desenvolver um jogo eletrônico completo e polido, desde sua concepção inicial de design até uma versão final pronta para ser lançada em plataformas digitais.
+O objetivo é desenvolver um jogo eletrônico, desde sua concepção inicial de design até uma versão final pronta para ser lançada em plataformas digitais.
 
 ### Contexto e Público-Alvo
 
