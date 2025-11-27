@@ -132,7 +132,7 @@ GameObject:
   - component: {fileID: 14338933}
   - component: {fileID: 14338932}
   - component: {fileID: 14338931}
-  - component: {fileID: 14338930}
+  - component: {fileID: 14338935}
   m_Layer: 0
   m_Name: Item_Frame
   m_TagString: Item
@@ -155,23 +155,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 875845854}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &14338930
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 14338928}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a7ca00d25ed737f46ab8b778808dbe86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  placementType: 1
-  gridSize: 1
-  floorLift: 1
-  wallOffset: 1
-  snapOffset: {x: 0.5, y: 0, z: 0.5}
 --- !u!54 &14338931
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -276,6 +259,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 14338928}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &14338935
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 14338928}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7ca00d25ed737f46ab8b778808dbe86, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DraggableItem
+  placementType: 1
+  gridSize: 1
+  floorLift: 0.5
 --- !u!1 &40282022
 GameObject:
   m_ObjectHideFlags: 0
@@ -492,7 +490,7 @@ GameObject:
   - component: {fileID: 284289680}
   - component: {fileID: 284289679}
   - component: {fileID: 284289678}
-  - component: {fileID: 284289677}
+  - component: {fileID: 284289682}
   m_Layer: 0
   m_Name: Item_Couch
   m_TagString: Item
@@ -515,23 +513,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 875845854}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &284289677
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 284289675}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a7ca00d25ed737f46ab8b778808dbe86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  placementType: 0
-  gridSize: 1
-  floorLift: 1
-  wallOffset: 0.1
-  snapOffset: {x: 0.5, y: 0, z: 0.5}
 --- !u!54 &284289678
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -636,6 +617,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 284289675}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &284289682
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 284289675}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7ca00d25ed737f46ab8b778808dbe86, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DraggableItem
+  placementType: 0
+  gridSize: 1
+  floorLift: 0.5
 --- !u!1 &334196982
 GameObject:
   m_ObjectHideFlags: 0
@@ -1003,7 +999,7 @@ GameObject:
   - component: {fileID: 906939113}
   - component: {fileID: 906939112}
   - component: {fileID: 906939111}
-  - component: {fileID: 906939110}
+  - component: {fileID: 906939115}
   m_Layer: 0
   m_Name: Item_Bed
   m_TagString: Item
@@ -1026,23 +1022,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 875845854}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &906939110
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 906939108}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a7ca00d25ed737f46ab8b778808dbe86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  placementType: 0
-  gridSize: 1
-  floorLift: 1
-  wallOffset: 1
-  snapOffset: {x: 0.5, y: 0, z: 0}
 --- !u!54 &906939111
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1147,6 +1126,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 906939108}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &906939115
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 906939108}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7ca00d25ed737f46ab8b778808dbe86, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DraggableItem
+  placementType: 0
+  gridSize: 1
+  floorLift: 0.5
 --- !u!1 &993124027
 GameObject:
   m_ObjectHideFlags: 0
@@ -1374,7 +1368,7 @@ GameObject:
   - component: {fileID: 1787943548}
   - component: {fileID: 1787943547}
   - component: {fileID: 1787943546}
-  - component: {fileID: 1787943545}
+  - component: {fileID: 1787943550}
   m_Layer: 0
   m_Name: Item_Carpet
   m_TagString: Item
@@ -1397,23 +1391,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 875845854}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1787943545
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1787943543}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a7ca00d25ed737f46ab8b778808dbe86, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  placementType: 0
-  gridSize: 1
-  floorLift: 1
-  wallOffset: 1
-  snapOffset: {x: 0.5, y: 0, z: 0.5}
 --- !u!54 &1787943546
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1518,6 +1495,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1787943543}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1787943550
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1787943543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7ca00d25ed737f46ab8b778808dbe86, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DraggableItem
+  placementType: 0
+  gridSize: 1
+  floorLift: 0.5
 --- !u!1 &1808434100
 GameObject:
   m_ObjectHideFlags: 0
