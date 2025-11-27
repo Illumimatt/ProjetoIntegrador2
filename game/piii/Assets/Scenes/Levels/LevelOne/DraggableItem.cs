@@ -2,20 +2,27 @@ using UnityEngine;
 
 public class DraggableItem : MonoBehaviour
 {
+    // --- SETTINGS ---
+    public enum PlacementType { FloorOnly, WallOnly, Any }
+    
+    [Header("Item Type")]
+    public PlacementType placementType = PlacementType.FloorOnly; // Set this in Inspector!
+
     [Header("Grid Settings")]
     public float gridSize = 1.0f;
-    public float liftHeight = 0.5f;
+    public float floorLift = 0.5f;     // Height when on floor
+    public float wallOffset = 1;    // Distance sticking out of wall
+    public Vector3 snapOffset = new Vector3(0.5f, 0, 0.5f); 
 
-    // NEW: Use 0.5 for odd sizes (1x1, 3x3) to center them in the tile.
-    // Use 0.0 for even sizes (2x2) to snap to the lines.
-    public Vector3 snapOffset = new Vector3(0.5f, 0, 0.5f);
-
+    // --- INTERNAL VARIABLES ---
     private bool isDragging = false;
-    private Vector3 offset;
     private Vector3 originalPosition;
-    private float targetY;
+    private Quaternion originalRotation; // To remember rotation if we snap back
     private Camera cam;
     private Rigidbody rb;
+
+    // Track what we are currently hovering over
+    private GameObject currentSurface; 
 
     void Start()
     {
@@ -23,38 +30,32 @@ public class DraggableItem : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         rb.useGravity = false;
         rb.isKinematic = true;
-        targetY = transform.position.y;
     }
 
     void OnMouseDown()
     {
         isDragging = true;
         originalPosition = transform.position;
-        offset = transform.position - GetMouseWorldPos();
-        transform.position = new Vector3(transform.position.x, targetY + liftHeight, transform.position.z);
+        originalRotation = transform.rotation;
     }
 
     void OnMouseUp()
     {
         isDragging = false;
 
-        // Snap first so we land in the right spot
-        SnapPosition();
-
-        // Apply visual drop height
-        transform.position = new Vector3(transform.position.x, targetY, transform.position.z);
-
-        // Check Logic
-        bool isSafe = IsOverFloor() && !CheckForOverlap();
-
-        if (isSafe)
+        // 1. Check if the placement is valid
+        if (IsValidPlacement())
         {
+            // Valid! Save this spot.
             originalPosition = transform.position;
+            originalRotation = transform.rotation;
         }
         else
         {
-            Debug.Log("Invalid Placement! Returning...");
+            // Invalid! Snap back to start.
+            Debug.Log("Invalid Surface! Returning...");
             transform.position = originalPosition;
+            transform.rotation = originalRotation;
         }
     }
 
@@ -62,48 +63,105 @@ public class DraggableItem : MonoBehaviour
     {
         if (isDragging)
         {
-            Vector3 mousePos = GetMouseWorldPos();
-            transform.position = new Vector3(mousePos.x + offset.x, targetY + liftHeight, mousePos.z + offset.z);
+            MoveAndAlign();
 
-            if (Input.GetMouseButtonDown(1))
+            // Allow rotation ONLY if we are on the floor (Wall items usually rely on wall normal)
+            if (currentSurface != null && currentSurface.CompareTag("Floor"))
             {
-                transform.Rotate(0, 90, 0);
+                if (Input.GetMouseButtonDown(1)) // Right Click
+                {
+                    transform.Rotate(0, 90, 0);
+                }
             }
         }
     }
 
-    void SnapPosition()
+    // --- CORE MOVEMENT LOGIC ---
+    void MoveAndAlign()
     {
-        float currentXOffset = snapOffset.x;
-        float currentZOffset = snapOffset.z;
+        Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
 
-        // Check our rotation (Y angle). 
-        // If it is 90 or 270 degrees, we have swapped orientation.
-        // We use Mathf.Round because rotation might be 90.0001
-        int angle = Mathf.RoundToInt(transform.eulerAngles.y);
-
-        // If angle is 90 or 270 (Odd multiples of 90), we swap dimensions
-        if (angle % 180 != 0)
+        // Raycast against everything (Floor and Walls)
+        if (Physics.Raycast(ray, out hit))
         {
-            currentXOffset = snapOffset.z;
-            currentZOffset = snapOffset.x;
+            currentSurface = hit.collider.gameObject;
+
+            // CASE A: We hit a WALL
+            if (hit.collider.CompareTag("Wall"))
+            {
+                // 1. Position: Stick to the wall point + offset
+                Vector3 targetPos = hit.point + (hit.normal * wallOffset);
+                
+                // 2. Snap: We need to figure out which axes to snap based on the wall direction
+                targetPos = SnapToWallGrid(targetPos, hit.normal);
+                transform.position = targetPos;
+
+                // 3. Rotation: Face away from the wall
+                transform.rotation = Quaternion.LookRotation(hit.normal);
+            }
+            // CASE B: We hit a FLOOR
+            else if (hit.collider.CompareTag("Floor"))
+            {
+                // 1. Position: Move flat on X/Z
+                float x = (Mathf.Floor(hit.point.x / gridSize) * gridSize) + GetCurrentOffset().x;
+                float z = (Mathf.Floor(hit.point.z / gridSize) * gridSize) + GetCurrentOffset().z;
+                
+                transform.position = new Vector3(x, hit.point.y + floorLift, z);
+
+                // 2. Rotation: Reset X/Z tilt, keep Y rotation (user rotation)
+                transform.rotation = Quaternion.Euler(0, transform.eulerAngles.y, 0);
+            }
         }
-
-        // Use the calculated "current" offsets
-        float x = (Mathf.Floor(transform.position.x / gridSize) * gridSize) + currentXOffset;
-        float z = (Mathf.Floor(transform.position.z / gridSize) * gridSize) + currentZOffset;
-
-        transform.position = new Vector3(x, targetY, z);
+        else
+        {
+            currentSurface = null; // Dragging in void
+            transform.position = GetMouseWorldPos();
+        }
     }
 
-    bool IsOverFloor()
+    // --- HELPER FUNCTIONS ---
+
+    private Vector3 GetMouseWorldPos()
     {
-        RaycastHit hit;
-        if (Physics.Raycast(transform.position, Vector3.down, out hit, 2.0f))
+        Plane plane = new Plane(Vector3.up, new Vector3(0, 0, 0));
+        Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+        float distance;
+        if (plane.Raycast(ray, out distance)) return ray.GetPoint(distance);
+        return transform.position;
+    }
+
+    Vector3 SnapToWallGrid(Vector3 rawPos, Vector3 normal)
+    {
+        // If normal is Z (facing Forward/Back), we snap X and Y
+        if (Mathf.Abs(normal.z) > 0.5f)
         {
-            if (hit.collider.CompareTag("Floor")) return true;
+            float x = Mathf.Round(rawPos.x / gridSize) * gridSize;
+            float y = Mathf.Round(rawPos.y / gridSize) * gridSize;
+            return new Vector3(x, y, rawPos.z);
         }
-        return false;
+        // If normal is X (facing Left/Right), we snap Z and Y
+        else 
+        {
+            float z = Mathf.Round(rawPos.z / gridSize) * gridSize;
+            float y = Mathf.Round(rawPos.y / gridSize) * gridSize;
+            return new Vector3(rawPos.x, y, z);
+        }
+    }
+
+    bool IsValidPlacement()
+    {
+        if (currentSurface == null) return false;
+
+        bool onFloor = currentSurface.CompareTag("Floor");
+        bool onWall = currentSurface.CompareTag("Wall");
+
+        if (placementType == PlacementType.FloorOnly && !onFloor) return false;
+        if (placementType == PlacementType.WallOnly && !onWall) return false;
+
+        if (CheckForOverlap()) return false;
+
+        return true;
     }
 
     bool CheckForOverlap()
@@ -113,7 +171,7 @@ public class DraggableItem : MonoBehaviour
 
         foreach (Collider hit in hits)
         {
-            if (hit.gameObject != gameObject && !hit.CompareTag("Floor"))
+            if (hit.gameObject != gameObject && hit.gameObject != currentSurface)
             {
                 return true;
             }
@@ -121,37 +179,17 @@ public class DraggableItem : MonoBehaviour
         return false;
     }
 
-    private Vector3 GetMouseWorldPos()
+    Vector3 GetCurrentOffset()
     {
-        Plane plane = new Plane(Vector3.up, new Vector3(0, targetY, 0));
-        Ray ray = cam.ScreenPointToRay(Input.mousePosition);
-        float distance;
-        if (plane.Raycast(ray, out distance)) return ray.GetPoint(distance);
-        return transform.position;
-    }
-
-    // --- UPDATED GIZMOS ---
-    void OnDrawGizmos()
-    {
-        Gizmos.color = new Color(1, 0.92f, 0.016f, 0.5f);
-        float roomSize = 10.0f;
-        float floorHeight = 0.01f;
-
-        // Draw the Grid Lines
-        for (float x = -roomSize; x <= roomSize; x += gridSize)
-            Gizmos.DrawLine(new Vector3(x, floorHeight, -roomSize), new Vector3(x, floorHeight, roomSize));
-
-        for (float z = -roomSize; z <= roomSize; z += gridSize)
-            Gizmos.DrawLine(new Vector3(-roomSize, floorHeight, z), new Vector3(roomSize, floorHeight, z));
-
-        // Draw the Snap Target (Accounting for Offset)
-        if (isDragging)
+        // Handles the rotation offset swapping for 2x1 items on floor
+        float currentX = snapOffset.x;
+        float currentZ = snapOffset.z;
+        int angle = Mathf.RoundToInt(transform.eulerAngles.y);
+        if (angle % 180 != 0) 
         {
-            Gizmos.color = Color.red;
-            float snapX = (Mathf.Floor(transform.position.x / gridSize) * gridSize) + snapOffset.x;
-            float snapZ = (Mathf.Floor(transform.position.z / gridSize) * gridSize) + snapOffset.z;
-
-            Gizmos.DrawSphere(new Vector3(snapX, transform.position.y, snapZ), 0.1f);
+            currentX = snapOffset.z;
+            currentZ = snapOffset.x;
         }
+        return new Vector3(currentX, 0, currentZ);
     }
 }
