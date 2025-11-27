@@ -6,6 +6,10 @@ public class DraggableItem : MonoBehaviour
     public float gridSize = 1.0f;
     public float liftHeight = 0.5f;
 
+    // NEW: Use 0.5 for odd sizes (1x1, 3x3) to center them in the tile.
+    // Use 0.0 for even sizes (2x2) to snap to the lines.
+    public Vector3 snapOffset = new Vector3(0.5f, 0, 0.5f);
+
     private bool isDragging = false;
     private Vector3 offset;
     private Vector3 originalPosition;
@@ -17,21 +21,16 @@ public class DraggableItem : MonoBehaviour
     {
         cam = Camera.main;
         rb = GetComponent<Rigidbody>();
-
         rb.useGravity = false;
         rb.isKinematic = true;
-
         targetY = transform.position.y;
     }
 
     void OnMouseDown()
     {
         isDragging = true;
-        originalPosition = transform.position; // Remember where we started
-
+        originalPosition = transform.position;
         offset = transform.position - GetMouseWorldPos();
-
-        // Lift up visually
         transform.position = new Vector3(transform.position.x, targetY + liftHeight, transform.position.z);
     }
 
@@ -39,23 +38,21 @@ public class DraggableItem : MonoBehaviour
     {
         isDragging = false;
 
-        // 1. Drop down
-        transform.position = new Vector3(transform.position.x, targetY, transform.position.z);
-
-        // 2. Snap to Grid
+        // Snap first so we land in the right spot
         SnapPosition();
 
-        // 3. VALIDATION: Must be Over Floor AND Not overlapping obstacles
+        // Apply visual drop height
+        transform.position = new Vector3(transform.position.x, targetY, transform.position.z);
+
+        // Check Logic
         bool isSafe = IsOverFloor() && !CheckForOverlap();
 
         if (isSafe)
         {
-            // Valid placement! Update the "original position" to this new spot
             originalPosition = transform.position;
         }
         else
         {
-            // Invalid! Go back to start
             Debug.Log("Invalid Placement! Returning...");
             transform.position = originalPosition;
         }
@@ -75,46 +72,53 @@ public class DraggableItem : MonoBehaviour
         }
     }
 
+    void SnapPosition()
+    {
+        float currentXOffset = snapOffset.x;
+        float currentZOffset = snapOffset.z;
+
+        // Check our rotation (Y angle). 
+        // If it is 90 or 270 degrees, we have swapped orientation.
+        // We use Mathf.Round because rotation might be 90.0001
+        int angle = Mathf.RoundToInt(transform.eulerAngles.y);
+
+        // If angle is 90 or 270 (Odd multiples of 90), we swap dimensions
+        if (angle % 180 != 0)
+        {
+            currentXOffset = snapOffset.z;
+            currentZOffset = snapOffset.x;
+        }
+
+        // Use the calculated "current" offsets
+        float x = (Mathf.Floor(transform.position.x / gridSize) * gridSize) + currentXOffset;
+        float z = (Mathf.Floor(transform.position.z / gridSize) * gridSize) + currentZOffset;
+
+        transform.position = new Vector3(x, targetY, z);
+    }
+
     bool IsOverFloor()
     {
-        // Cast a ray from the center of the object DOWNWARDS
-        // We check 2 units down just to be safe
         RaycastHit hit;
         if (Physics.Raycast(transform.position, Vector3.down, out hit, 2.0f))
         {
-            // If we hit something tagged "Floor", we are safe
-            if (hit.collider.CompareTag("Floor"))
-            {
-                return true;
-            }
-        }
-        return false; // We hit nothing (void) or something that isn't floor
-    }
-
-    bool CheckForOverlap()
-    {
-        // Box is slightly smaller (0.9) to avoid accidental edge hits
-        Vector3 size = transform.localScale * 0.9f;
-
-        Collider[] hits = Physics.OverlapBox(transform.position, size / 2, transform.rotation);
-
-        foreach (Collider hit in hits)
-        {
-            // If we hit something that is NOT us and NOT the floor...
-            if (hit.gameObject != gameObject && !hit.CompareTag("Floor"))
-            {
-                // It's a wall or another item!
-                return true;
-            }
+            if (hit.collider.CompareTag("Floor")) return true;
         }
         return false;
     }
 
-    void SnapPosition()
+    bool CheckForOverlap()
     {
-        float x = Mathf.Round(transform.position.x / gridSize) * gridSize;
-        float z = Mathf.Round(transform.position.z / gridSize) * gridSize;
-        transform.position = new Vector3(x, targetY, z);
+        Vector3 size = transform.localScale * 0.9f;
+        Collider[] hits = Physics.OverlapBox(transform.position, size / 2, transform.rotation);
+
+        foreach (Collider hit in hits)
+        {
+            if (hit.gameObject != gameObject && !hit.CompareTag("Floor"))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     private Vector3 GetMouseWorldPos()
@@ -126,34 +130,27 @@ public class DraggableItem : MonoBehaviour
         return transform.position;
     }
 
-    // VISUAL DEBUGGING: Draws a grid in the Scene and Game view
+    // --- UPDATED GIZMOS ---
     void OnDrawGizmos()
     {
-        // 1. Pick a color (Yellow is easy to see against blue/dark floors)
         Gizmos.color = new Color(1, 0.92f, 0.016f, 0.5f);
-
-        // 2. Define how big of an area you want to see
         float roomSize = 10.0f;
-        float floorHeight = 0.01f; // Slightly above 0 so it doesn't clip with the floor
+        float floorHeight = 0.01f;
 
-        // 3. Draw Lines along the Z-axis (Vertical)
+        // Draw the Grid Lines
         for (float x = -roomSize; x <= roomSize; x += gridSize)
-        {
             Gizmos.DrawLine(new Vector3(x, floorHeight, -roomSize), new Vector3(x, floorHeight, roomSize));
-        }
 
-        // 4. Draw Lines along the X-axis (Horizontal)
         for (float z = -roomSize; z <= roomSize; z += gridSize)
-        {
             Gizmos.DrawLine(new Vector3(-roomSize, floorHeight, z), new Vector3(roomSize, floorHeight, z));
-        }
 
-        // 5. Draw a sphere at the item's "Target Snap Position" to see where it wants to go
+        // Draw the Snap Target (Accounting for Offset)
         if (isDragging)
         {
             Gizmos.color = Color.red;
-            float snapX = Mathf.Round(transform.position.x / gridSize) * gridSize;
-            float snapZ = Mathf.Round(transform.position.z / gridSize) * gridSize;
+            float snapX = (Mathf.Floor(transform.position.x / gridSize) * gridSize) + snapOffset.x;
+            float snapZ = (Mathf.Floor(transform.position.z / gridSize) * gridSize) + snapOffset.z;
+
             Gizmos.DrawSphere(new Vector3(snapX, transform.position.y, snapZ), 0.1f);
         }
     }
