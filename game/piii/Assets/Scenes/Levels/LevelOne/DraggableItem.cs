@@ -2,53 +2,60 @@ using UnityEngine;
 
 public class DraggableItem : MonoBehaviour
 {
-    [Header("Settings")]
-    public float gridSize = 0.5f; // How big each "tile" is
-    public bool snapToGrid = true;
+    [Header("Grid Settings")]
+    public float gridSize = 1.0f; // Set this to match your floor tile size
+    public float liftHeight = 0.5f; // How high it lifts when dragging
 
     private bool isDragging = false;
     private Vector3 offset;
-    private SpriteRenderer spriteRenderer;
-    private int originalOrder;
-    private Vector3 startPosition;
+    private Vector3 originalPosition;
+    private float targetY; // The height where the object should sit
+    private Camera cam;
+
+    // Physics variables
+    private Rigidbody rb;
+    private BoxCollider col;
 
     void Start()
     {
-        spriteRenderer = GetComponent<SpriteRenderer>();
+        cam = Camera.main;
+        rb = GetComponent<Rigidbody>();
+        col = GetComponent<BoxCollider>();
+
+        // Disable gravity so it doesn't fall through the floor while we drag
+        rb.useGravity = false;
+        rb.isKinematic = true; // We control movement manually
+
+        targetY = transform.position.y; // Remember floor height
     }
 
     void OnMouseDown()
     {
-        // 1. Pick up
         isDragging = true;
-        startPosition = transform.position; // Remember where we were in case the move is invalid
+        originalPosition = transform.position;
 
-        // Calculate offset so the item doesn't snap weirdly to the center of the mouse
+        // 1. Calculate offset so we don't snap to center
         offset = transform.position - GetMouseWorldPos();
 
-        // Visual feedback: Pop item to the front while holding
-        originalOrder = spriteRenderer.sortingOrder;
-        spriteRenderer.sortingOrder = 100;
+        // 2. Visual "Pop": Lift the object up
+        transform.position = new Vector3(transform.position.x, targetY + liftHeight, transform.position.z);
     }
 
     void OnMouseUp()
     {
-        // 2. Drop
         isDragging = false;
 
-        if (snapToGrid)
-        {
-            SnapPosition();
-        }
+        // 1. Drop it (Return to normal height)
+        transform.position = new Vector3(transform.position.x, targetY, transform.position.z);
 
-        // Restore layer order
-        spriteRenderer.sortingOrder = originalOrder;
+        // 2. Snap to Grid
+        SnapPosition();
 
-        // 3. Validation
-        if (IsOverlapping())
+        // 3. Check for Collisions (Prevent stacking)
+        if (CheckForOverlap())
         {
-            Debug.Log("Space Occupied! Returning to start.");
-            transform.position = startPosition; // Bounce back
+            Debug.Log("Can't place here!");
+            transform.position = originalPosition; // Return to start
         }
     }
 
@@ -56,48 +63,57 @@ public class DraggableItem : MonoBehaviour
     {
         if (isDragging)
         {
-            Vector3 targetPos = GetMouseWorldPos() + offset;
-            transform.position = targetPos;
+            // Move object with mouse
+            Vector3 mousePos = GetMouseWorldPos();
+            transform.position = new Vector3(mousePos.x + offset.x, targetY + liftHeight, mousePos.z + offset.z);
+
+            // ROTATION (Right Click)
+            if (Input.GetMouseButtonDown(1)) // 0 is Left, 1 is Right
+            {
+                transform.Rotate(0, 90, 0); // Rotate 90 degrees on Y axis
+            }
         }
+    }
+
+    // Helper to get mouse position on the 3D plane
+    private Vector3 GetMouseWorldPos()
+    {
+        // Create an invisible plane at the object's height
+        Plane plane = new Plane(Vector3.up, new Vector3(0, transform.position.y, 0));
+        Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+
+        float distance;
+        if (plane.Raycast(ray, out distance))
+        {
+            return ray.GetPoint(distance);
+        }
+        return transform.position;
     }
 
     void SnapPosition()
     {
-        // Round position to nearest Grid Size
+        // Round X and Z to nearest grid size
         float x = Mathf.Round(transform.position.x / gridSize) * gridSize;
-        float y = Mathf.Round(transform.position.y / gridSize) * gridSize;
+        float z = Mathf.Round(transform.position.z / gridSize) * gridSize;
 
-        transform.position = new Vector3(x, y, 0);
+        transform.position = new Vector3(x, targetY, z);
     }
 
-    // Check if we dropped on top of another Collider
-    bool IsOverlapping()
+    bool CheckForOverlap()
     {
-        // Create a hidden box slightly smaller than our grid size to check for hits
-        Collider2D hit = Physics2D.OverlapBox(transform.position, Vector2.one * (gridSize * 0.9f), 0);
+        // Make the detection box slightly smaller than the object to avoid edge-touching
+        Vector3 size = transform.localScale * 0.9f;
 
-        // If we hit something that is NOT ourselves
-        if (hit != null && hit.gameObject != this.gameObject)
+        Collider[] hits = Physics.OverlapBox(transform.position, size / 2, transform.rotation);
+
+        foreach (Collider hit in hits)
         {
-            return true;
+            // If we hit something that is NOT the floor and NOT ourselves
+            if (hit.gameObject != gameObject && !hit.CompareTag("Floor"))
+            {
+                return true; // Overlap detected
+            }
         }
         return false;
-    }
-
-    private Vector3 GetMouseWorldPos()
-    {
-        Vector3 mousePoint = Input.mousePosition;
-        mousePoint.z = 10.0f; // Distance from camera
-        return Camera.main.ScreenToWorldPoint(mousePoint);
-    }
-
-    // Draw grid lines in the Editor so you can see them (Debugging)
-    void OnDrawGizmos()
-    {
-        Gizmos.color = Color.gray;
-        for (float x = -10; x < 10; x += gridSize)
-            Gizmos.DrawLine(new Vector3(x, -10, 0), new Vector3(x, 10, 0));
-        for (float y = -10; y < 10; y += gridSize)
-            Gizmos.DrawLine(new Vector3(-10, y, 0), new Vector3(10, y, 0));
     }
 }
