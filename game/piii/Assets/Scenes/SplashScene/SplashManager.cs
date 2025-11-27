@@ -4,11 +4,14 @@ using System.Collections;
 
 public class SplashManager : MonoBehaviour
 {
-    public float waitTime = 5.0f; // Time in seconds before loading menu
+    
+    /// <summary>
+    /// Time in seconds before loading the main menu
+    /// </summary>
+    public float waitTime = 5.0f;
 
     void Start()
     {
-        // Start the countdown as soon as the scene loads
         StartCoroutine(ToMainMenu());
     }
 
