@@ -4,7 +4,7 @@ using System.Collections;
 
 public class SplashManager : MonoBehaviour
 {
-    
+
     /// <summary>
     /// Time in seconds before loading the main menu
     /// </summary>
