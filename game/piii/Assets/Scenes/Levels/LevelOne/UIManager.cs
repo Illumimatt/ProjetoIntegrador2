@@ -47,7 +47,7 @@ public class UIManager : MonoBehaviour
 
     void OnQuitClicked()
     {
-        UnityEngine.SceneManagement.SceneManager.LoadScene("StartScene");
+        UnityEngine.SceneManagement.SceneManager.LoadScene("LevelSelection");
     }
 
     public void TogglePauseMenu(bool show)

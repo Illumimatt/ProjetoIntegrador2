@@ -18,6 +18,6 @@ public class SplashManager : MonoBehaviour
     IEnumerator ToMainMenu()
     {
         yield return new WaitForSeconds(waitTime);
-        SceneManager.LoadScene("StartScene");
+        SceneManager.LoadScene("LevelSelection");
     }
 }
