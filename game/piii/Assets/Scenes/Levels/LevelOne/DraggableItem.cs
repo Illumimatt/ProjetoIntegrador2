@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Linq; // Needed for sorting raycasts
 
 public class DraggableItem : MonoBehaviour
 {
@@ -30,6 +29,11 @@ public class DraggableItem : MonoBehaviour
     void Start()
     {
         cam = Camera.main;
+        if (cam == null)
+        {
+            Debug.LogError("DraggableItem: Camera.main is null! Please ensure a camera is tagged as MainCamera.");
+        }
+
         rb = GetComponent<Rigidbody>();
         if (rb)
         {
@@ -37,9 +41,6 @@ public class DraggableItem : MonoBehaviour
             rb.isKinematic = true;
         }
 
-        // 1. AUTO-CALCULATE OFFSET (Fixes Grid Respect)
-        // Odd sizes (1,3,5) need 0.5 offset to center in tile.
-        // Even sizes (2,4,6) need 0.0 offset to sit on lines.
         int sizeX = Mathf.RoundToInt(transform.localScale.x);
         int sizeY = Mathf.RoundToInt(transform.localScale.y);
         int sizeZ = Mathf.RoundToInt(transform.localScale.z);
@@ -50,8 +51,6 @@ public class DraggableItem : MonoBehaviour
             (sizeZ % 2 != 0) ? 0.5f : 0.0f
         );
 
-        // 2. AUTO-CALCULATE WALL DEPTH
-        // Ensures item sits flush against wall based on thickness
         dynamicWallOffset = transform.localScale.z / 2.0f;
     }
 
@@ -85,7 +84,6 @@ public class DraggableItem : MonoBehaviour
         {
             MoveAndAlign();
 
-            // Rotation logic (Only allowed on Floor)
             if (currentSurface != null && currentSurface.CompareTag("Floor"))
             {
                 if (Input.GetMouseButtonDown(1))
@@ -98,9 +96,10 @@ public class DraggableItem : MonoBehaviour
 
     void MoveAndAlign()
     {
+        if (cam == null) return;
+
         Ray ray = cam.ScreenPointToRay(Input.mousePosition);
 
-        // FIX: Use RaycastAll to pierce through the item being dragged
         RaycastHit[] hits = Physics.RaycastAll(ray);
 
         // Sort hits by distance so we process the closest surface first
@@ -110,27 +109,23 @@ public class DraggableItem : MonoBehaviour
 
         foreach (RaycastHit hit in hits)
         {
-            // CRITICAL FIX: Ignore ourself!
             if (hit.collider.gameObject == gameObject) continue;
 
-            // If we hit a valid surface (Wall or Floor), latch onto it
             if (hit.collider.CompareTag("Wall"))
             {
                 currentSurface = hit.collider.gameObject;
                 surfaceFound = true;
 
-                // Wall Logic
                 Vector3 targetPos = hit.point + (hit.normal * dynamicWallOffset);
                 transform.rotation = Quaternion.LookRotation(hit.normal);
                 transform.position = SnapToWallGrid(targetPos, hit.normal);
-                break; // Stop looking, we found the wall
+                break;
             }
             else if (hit.collider.CompareTag("Floor"))
             {
                 currentSurface = hit.collider.gameObject;
                 surfaceFound = true;
 
-                // Floor Logic
                 Vector3 currentOffset = GetRotatedFloorOffset();
 
                 float x = (Mathf.Floor(hit.point.x / gridSize) * gridSize) + currentOffset.x;
@@ -138,17 +133,14 @@ public class DraggableItem : MonoBehaviour
 
                 transform.position = new Vector3(x, hit.point.y + floorLift, z);
 
-                // Reset X/Z rotation, keep Y
                 transform.rotation = Quaternion.Euler(0, transform.eulerAngles.y, 0);
-                break; // Stop looking, we found the floor
+                break;
             }
         }
 
-        // If the raycast went through everything and hit nothing valid
         if (!surfaceFound)
         {
             currentSurface = null;
-            // Fallback: Just follow the mouse plane (Visual feedback that you are in void)
             transform.position = GetMouseWorldPos();
         }
     }
@@ -179,12 +171,17 @@ public class DraggableItem : MonoBehaviour
 
     Vector3 GetRotatedFloorOffset()
     {
-        // Swap offsets if rotated 90 degrees
+        // Swap offsets if rotated 90 or 270 degrees
         float currentX = calculatedOffset.x;
         float currentZ = calculatedOffset.z;
 
-        int angle = Mathf.RoundToInt(transform.eulerAngles.y);
-        if (angle % 180 != 0)
+        // Normalize angle to 0-360 range and check if rotated 90 or 270 degrees
+        float angle = transform.eulerAngles.y;
+        angle = angle % 360f;
+        if (angle < 0) angle += 360f;
+
+        // Check if angle is approximately 90 or 270 degrees (with small tolerance)
+        if (Mathf.Abs(angle - 90f) < 1f || Mathf.Abs(angle - 270f) < 1f)
         {
             currentX = calculatedOffset.z;
             currentZ = calculatedOffset.x;
@@ -224,6 +221,8 @@ public class DraggableItem : MonoBehaviour
 
     private Vector3 GetMouseWorldPos()
     {
+        if (cam == null) return transform.position;
+
         Plane plane = new Plane(Vector3.up, Vector3.zero);
         Ray ray = cam.ScreenPointToRay(Input.mousePosition);
         float distance;
