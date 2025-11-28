@@ -10,7 +10,10 @@ public class DraggableItem : MonoBehaviour
 
     [Header("Grid Settings")]
     public float gridSize = 1.0f;
-    public float floorLift = 1.0f;
+    public float floorLift = 0.5f;
+
+    [Header("Room Logic")]
+    public Vector3 roomCenter = Vector3.zero; // NEW: Defines where the "Inside" is
 
     // We calculate these automatically now
     private Vector3 calculatedOffset;
@@ -19,14 +22,11 @@ public class DraggableItem : MonoBehaviour
     // --- INTERNAL VARIABLES ---
     private Vector3 initialPosition;
     private Quaternion initialRotation;
-
     private bool isDragging = false;
     private Vector3 originalPosition;
     private Quaternion originalRotation;
     private Camera cam;
     private Rigidbody rb;
-
-    // Track what surface is UNDER the item
     private GameObject currentSurface;
 
     void Start()
@@ -35,13 +35,8 @@ public class DraggableItem : MonoBehaviour
         if (cam == null) Debug.LogError("DraggableItem: Camera.main is null!");
 
         rb = GetComponent<Rigidbody>();
-        if (rb)
-        {
-            rb.useGravity = false;
-            rb.isKinematic = true;
-        }
+        if (rb) { rb.useGravity = false; rb.isKinematic = true; }
 
-        // Auto-Calculate Grid Offset
         int sizeX = Mathf.RoundToInt(transform.localScale.x);
         int sizeY = Mathf.RoundToInt(transform.localScale.y);
         int sizeZ = Mathf.RoundToInt(transform.localScale.z);
@@ -53,7 +48,6 @@ public class DraggableItem : MonoBehaviour
         );
 
         dynamicWallOffset = transform.localScale.z / 2.0f;
-
         initialPosition = transform.position;
         initialRotation = transform.rotation;
     }
@@ -73,13 +67,11 @@ public class DraggableItem : MonoBehaviour
         {
             if (currentSurface == null)
             {
-                // Dropped in void -> Return to spawn
                 transform.position = initialPosition;
                 transform.rotation = initialRotation;
             }
             else
             {
-                // Valid placement -> Save state
                 originalPosition = transform.position;
                 originalRotation = transform.rotation;
             }
@@ -100,10 +92,7 @@ public class DraggableItem : MonoBehaviour
 
             if (currentSurface != null && currentSurface.CompareTag("Floor"))
             {
-                if (Input.GetMouseButtonDown(1))
-                {
-                    transform.Rotate(0, 90, 0);
-                }
+                if (Input.GetMouseButtonDown(1)) transform.Rotate(0, 90, 0);
             }
         }
     }
@@ -124,19 +113,23 @@ public class DraggableItem : MonoBehaviour
 
             if (hit.collider.CompareTag("Wall"))
             {
-                // FIX: Ignore the top/bottom faces of the wall
-                // If the normal points Up (1) or Down (-1), it's not a valid side face.
+                // CHECK 1: Ignore Ceiling/Floor faces of the Wall Cube
                 if (Mathf.Abs(hit.normal.y) > 0.1f) continue;
+
+                // CHECK 2: Ignore Exterior Faces (NEW)
+                // Calculate direction from the hit point TO the center of the room
+                Vector3 directionToRoom = roomCenter - hit.point;
+
+                // If the normal and the direction to room are pointing in opposite ways (Dot < 0),
+                // it means this face is looking AWAY from the center (Exterior). Skip it.
+                if (Vector3.Dot(hit.normal, directionToRoom) < 0) continue;
 
                 currentSurface = hit.collider.gameObject;
                 surfaceFound = true;
 
                 Vector3 targetPos = hit.point + (hit.normal * dynamicWallOffset);
                 transform.rotation = Quaternion.LookRotation(hit.normal);
-
                 Vector3 snappedPos = SnapToWallGrid(targetPos, hit.normal);
-
-                // Keep the existing Clamp logic to stop it sliding off the sides/top
                 transform.position = ClampToSurfaceBounds(snappedPos, currentSurface);
                 break;
             }
@@ -151,7 +144,6 @@ public class DraggableItem : MonoBehaviour
 
                 Vector3 targetPos = new Vector3(x, hit.point.y + floorLift, z);
                 transform.rotation = Quaternion.Euler(0, transform.eulerAngles.y, 0);
-
                 transform.position = ClampToSurfaceBounds(targetPos, currentSurface);
                 break;
             }
@@ -168,7 +160,7 @@ public class DraggableItem : MonoBehaviour
 
     bool IsValidPlacement()
     {
-        if (currentSurface == null) return true; // Handle void drop in OnMouseUp
+        if (currentSurface == null) return true;
 
         bool onFloor = currentSurface.CompareTag("Floor");
         bool onWall = currentSurface.CompareTag("Wall");
@@ -177,8 +169,6 @@ public class DraggableItem : MonoBehaviour
         if (placementType == PlacementType.WallOnly && !onWall) return false;
 
         if (CheckForOverlap()) return false;
-
-        // NEW: Check if object is strictly inside the bounds of the floor/wall
         if (!IsInsideSurfaceBounds()) return false;
 
         return true;
@@ -187,62 +177,37 @@ public class DraggableItem : MonoBehaviour
     bool IsInsideSurfaceBounds()
     {
         if (currentSurface == null) return true;
-
         Collider itemCol = GetComponent<Collider>();
         Collider surfCol = currentSurface.GetComponent<Collider>();
-
         if (!itemCol || !surfCol) return true;
 
         Bounds iBounds = itemCol.bounds;
         Bounds sBounds = surfCol.bounds;
-
-        // Small tolerance to handle floating point imprecision
         float tolerance = 0.05f;
 
         if (currentSurface.CompareTag("Floor"))
         {
-            // For Floor, we check if the item's footprint (X and Z) is inside the floor
-            // We ignore Y because the item sits *on top* of the floor
-            bool insideX = iBounds.min.x >= sBounds.min.x - tolerance && iBounds.max.x <= sBounds.max.x + tolerance;
-            bool insideZ = iBounds.min.z >= sBounds.min.z - tolerance && iBounds.max.z <= sBounds.max.z + tolerance;
-
-            return insideX && insideZ;
+            return iBounds.min.x >= sBounds.min.x - tolerance && iBounds.max.x <= sBounds.max.x + tolerance &&
+                   iBounds.min.z >= sBounds.min.z - tolerance && iBounds.max.z <= sBounds.max.z + tolerance;
         }
-        else if (currentSurface.CompareTag("Wall"))
+        else // Wall
         {
-            // For Walls, first check Height (Y)
-            bool insideY = iBounds.min.y >= sBounds.min.y - tolerance && iBounds.max.y <= sBounds.max.y + tolerance;
-            if (!insideY) return false;
+            if (iBounds.min.y < sBounds.min.y - tolerance || iBounds.max.y > sBounds.max.y + tolerance) return false;
 
-            // Then check Width based on wall orientation
-            // If Wall is wider along X, it's a Back/Front wall -> Check X
             if (sBounds.size.x > sBounds.size.z)
-            {
-                bool insideX = iBounds.min.x >= sBounds.min.x - tolerance && iBounds.max.x <= sBounds.max.x + tolerance;
-                return insideX;
-            }
+                return iBounds.min.x >= sBounds.min.x - tolerance && iBounds.max.x <= sBounds.max.x + tolerance;
             else
-            {
-                // Wall is wider along Z, it's a Side wall -> Check Z
-                bool insideZ = iBounds.min.z >= sBounds.min.z - tolerance && iBounds.max.z <= sBounds.max.z + tolerance;
-                return insideZ;
-            }
+                return iBounds.min.z >= sBounds.min.z - tolerance && iBounds.max.z <= sBounds.max.z + tolerance;
         }
-
-        return true;
     }
 
     bool CheckForOverlap()
     {
         Vector3 size = transform.localScale * 0.9f;
         Collider[] hits = Physics.OverlapBox(transform.position, size / 2, transform.rotation);
-
         foreach (Collider hit in hits)
         {
-            if (hit.gameObject != gameObject && hit.gameObject != currentSurface)
-            {
-                return true;
-            }
+            if (hit.gameObject != gameObject && hit.gameObject != currentSurface) return true;
         }
         return false;
     }
@@ -251,7 +216,6 @@ public class DraggableItem : MonoBehaviour
     {
         float xOffset = calculatedOffset.x;
         float yOffset = calculatedOffset.y;
-
         if (Mathf.Abs(normal.z) > 0.5f)
         {
             float x = (Mathf.Floor(rawPos.x / gridSize) * gridSize) + xOffset;
@@ -268,19 +232,12 @@ public class DraggableItem : MonoBehaviour
 
     Vector3 GetRotatedFloorOffset()
     {
-        float currentX = calculatedOffset.x;
-        float currentZ = calculatedOffset.z;
-
-        float angle = transform.eulerAngles.y;
-        angle = angle % 360f;
-        if (angle < 0) angle += 360f;
-
-        if (Mathf.Abs(angle - 90f) < 1f || Mathf.Abs(angle - 270f) < 1f)
-        {
-            currentX = calculatedOffset.z;
-            currentZ = calculatedOffset.x;
-        }
-        return new Vector3(currentX, 0, currentZ);
+        float cx = calculatedOffset.x; float cz = calculatedOffset.z;
+        int angle = Mathf.RoundToInt(transform.eulerAngles.y);
+        angle = angle % 360; if(angle < 0) angle += 360;
+        
+        if (Mathf.Abs(angle - 90) < 1 || Mathf.Abs(angle - 270) < 1) { cx = calculatedOffset.z; cz = calculatedOffset.x; }
+        return new Vector3(cx, 0, cz);
     }
 
     private Vector3 GetMouseWorldPos()
@@ -288,8 +245,7 @@ public class DraggableItem : MonoBehaviour
         if (cam == null) return transform.position;
         Plane plane = new Plane(Vector3.up, Vector3.zero);
         Ray ray = cam.ScreenPointToRay(Input.mousePosition);
-        float distance;
-        if (plane.Raycast(ray, out distance)) return ray.GetPoint(distance);
+        float d; if (plane.Raycast(ray, out d)) return ray.GetPoint(d);
         return transform.position;
     }
 
@@ -299,11 +255,8 @@ public class DraggableItem : MonoBehaviour
         if (surfaceCol == null) return targetPos;
 
         Bounds sBounds = surfaceCol.bounds;
-
-        // Calculate half-size of the item to keep it fully inside
         Vector3 itemHalfSize = transform.localScale * 0.5f;
 
-        // Swap dimensions if rotated 90 degrees
         if (Mathf.Abs(transform.forward.x) > 0.5f)
         {
             float temp = itemHalfSize.x;
@@ -311,7 +264,6 @@ public class DraggableItem : MonoBehaviour
             itemHalfSize.z = temp;
         }
 
-        // Define valid range
         float minX = sBounds.min.x + itemHalfSize.x;
         float maxX = sBounds.max.x - itemHalfSize.x;
         float minY = sBounds.min.y + itemHalfSize.y;
@@ -321,27 +273,17 @@ public class DraggableItem : MonoBehaviour
 
         if (surface.CompareTag("Floor"))
         {
-            // Floor: Clamp X and Z
             float clampedX = (minX > maxX) ? sBounds.center.x : Mathf.Clamp(targetPos.x, minX, maxX);
             float clampedZ = (minZ > maxZ) ? sBounds.center.z : Mathf.Clamp(targetPos.z, minZ, maxZ);
             return new Vector3(clampedX, targetPos.y, clampedZ);
         }
-        else // Wall
+        else
         {
-            // Wall: Always Clamp Y (Height) - This stops it going too high!
             float clampedY = (minY > maxY) ? sBounds.center.y : Mathf.Clamp(targetPos.y, minY, maxY);
-
-            // Clamp Width based on orientation
-            if (sBounds.size.x > sBounds.size.z) // Back/Front Wall
-            {
-                float clampedX = (minX > maxX) ? sBounds.center.x : Mathf.Clamp(targetPos.x, minX, maxX);
-                return new Vector3(clampedX, clampedY, targetPos.z);
-            }
-            else // Side Wall
-            {
-                float clampedZ = (minZ > maxZ) ? sBounds.center.z : Mathf.Clamp(targetPos.z, minZ, maxZ);
-                return new Vector3(targetPos.x, clampedY, clampedZ);
-            }
+            if (sBounds.size.x > sBounds.size.z)
+                return new Vector3(Mathf.Clamp(targetPos.x, minX, maxX), clampedY, targetPos.z);
+            else
+                return new Vector3(targetPos.x, clampedY, Mathf.Clamp(targetPos.z, minZ, maxZ));
         }
     }
 }
