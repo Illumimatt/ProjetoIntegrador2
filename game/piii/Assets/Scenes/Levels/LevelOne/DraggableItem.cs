@@ -124,12 +124,20 @@ public class DraggableItem : MonoBehaviour
 
             if (hit.collider.CompareTag("Wall"))
             {
+                // FIX: Ignore the top/bottom faces of the wall
+                // If the normal points Up (1) or Down (-1), it's not a valid side face.
+                if (Mathf.Abs(hit.normal.y) > 0.1f) continue;
+
                 currentSurface = hit.collider.gameObject;
                 surfaceFound = true;
 
                 Vector3 targetPos = hit.point + (hit.normal * dynamicWallOffset);
                 transform.rotation = Quaternion.LookRotation(hit.normal);
-                transform.position = SnapToWallGrid(targetPos, hit.normal);
+
+                Vector3 snappedPos = SnapToWallGrid(targetPos, hit.normal);
+
+                // Keep the existing Clamp logic to stop it sliding off the sides/top
+                transform.position = ClampToSurfaceBounds(snappedPos, currentSurface);
                 break;
             }
             else if (hit.collider.CompareTag("Floor"))
@@ -138,12 +146,13 @@ public class DraggableItem : MonoBehaviour
                 surfaceFound = true;
 
                 Vector3 currentOffset = GetRotatedFloorOffset();
-
                 float x = (Mathf.Floor(hit.point.x / gridSize) * gridSize) + currentOffset.x;
                 float z = (Mathf.Floor(hit.point.z / gridSize) * gridSize) + currentOffset.z;
 
-                transform.position = new Vector3(x, hit.point.y + floorLift, z);
+                Vector3 targetPos = new Vector3(x, hit.point.y + floorLift, z);
                 transform.rotation = Quaternion.Euler(0, transform.eulerAngles.y, 0);
+
+                transform.position = ClampToSurfaceBounds(targetPos, currentSurface);
                 break;
             }
         }
@@ -282,5 +291,57 @@ public class DraggableItem : MonoBehaviour
         float distance;
         if (plane.Raycast(ray, out distance)) return ray.GetPoint(distance);
         return transform.position;
+    }
+
+    Vector3 ClampToSurfaceBounds(Vector3 targetPos, GameObject surface)
+    {
+        Collider surfaceCol = surface.GetComponent<Collider>();
+        if (surfaceCol == null) return targetPos;
+
+        Bounds sBounds = surfaceCol.bounds;
+
+        // Calculate half-size of the item to keep it fully inside
+        Vector3 itemHalfSize = transform.localScale * 0.5f;
+
+        // Swap dimensions if rotated 90 degrees
+        if (Mathf.Abs(transform.forward.x) > 0.5f)
+        {
+            float temp = itemHalfSize.x;
+            itemHalfSize.x = itemHalfSize.z;
+            itemHalfSize.z = temp;
+        }
+
+        // Define valid range
+        float minX = sBounds.min.x + itemHalfSize.x;
+        float maxX = sBounds.max.x - itemHalfSize.x;
+        float minY = sBounds.min.y + itemHalfSize.y;
+        float maxY = sBounds.max.y - itemHalfSize.y;
+        float minZ = sBounds.min.z + itemHalfSize.z;
+        float maxZ = sBounds.max.z - itemHalfSize.z;
+
+        if (surface.CompareTag("Floor"))
+        {
+            // Floor: Clamp X and Z
+            float clampedX = (minX > maxX) ? sBounds.center.x : Mathf.Clamp(targetPos.x, minX, maxX);
+            float clampedZ = (minZ > maxZ) ? sBounds.center.z : Mathf.Clamp(targetPos.z, minZ, maxZ);
+            return new Vector3(clampedX, targetPos.y, clampedZ);
+        }
+        else // Wall
+        {
+            // Wall: Always Clamp Y (Height) - This stops it going too high!
+            float clampedY = (minY > maxY) ? sBounds.center.y : Mathf.Clamp(targetPos.y, minY, maxY);
+
+            // Clamp Width based on orientation
+            if (sBounds.size.x > sBounds.size.z) // Back/Front Wall
+            {
+                float clampedX = (minX > maxX) ? sBounds.center.x : Mathf.Clamp(targetPos.x, minX, maxX);
+                return new Vector3(clampedX, clampedY, targetPos.z);
+            }
+            else // Side Wall
+            {
+                float clampedZ = (minZ > maxZ) ? sBounds.center.z : Mathf.Clamp(targetPos.z, minZ, maxZ);
+                return new Vector3(targetPos.x, clampedY, clampedZ);
+            }
+        }
     }
 }
