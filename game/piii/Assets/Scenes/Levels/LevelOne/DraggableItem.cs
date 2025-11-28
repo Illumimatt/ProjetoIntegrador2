@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.Rendering;
+using System.Linq;
 
 public class DraggableItem : MonoBehaviour
 {
@@ -13,13 +15,18 @@ public class DraggableItem : MonoBehaviour
     public float floorLift = 0.5f;
 
     [Header("Room Logic")]
-    public Vector3 roomCenter = Vector3.zero; // NEW: Defines where the "Inside" is
+    public Vector3 roomCenter = Vector3.zero;
 
-    // We calculate these automatically now
+    // --- VISUALS ---
+    private MeshRenderer meshRenderer;
+    private Color originalColor;
+    private int originalRenderQueue; // To remember the default sorting
+
+    // --- AUTO-CALCULATED ---
     private Vector3 calculatedOffset;
     private float dynamicWallOffset;
 
-    // --- INTERNAL VARIABLES ---
+    // --- INTERNAL ---
     private Vector3 initialPosition;
     private Quaternion initialRotation;
     private bool isDragging = false;
@@ -36,6 +43,15 @@ public class DraggableItem : MonoBehaviour
 
         rb = GetComponent<Rigidbody>();
         if (rb) { rb.useGravity = false; rb.isKinematic = true; }
+
+        // VISUAL SETUP
+        meshRenderer = GetComponent<MeshRenderer>();
+        if (meshRenderer != null)
+        {
+            originalColor = meshRenderer.material.color;
+            // Store the original render queue (usually 3000 for Transparent)
+            originalRenderQueue = meshRenderer.material.renderQueue;
+        }
 
         int sizeX = Mathf.RoundToInt(transform.localScale.x);
         int sizeY = Mathf.RoundToInt(transform.localScale.y);
@@ -63,6 +79,15 @@ public class DraggableItem : MonoBehaviour
     {
         isDragging = false;
 
+        // RESET VISUALS ON DROP
+        if (meshRenderer != null)
+        {
+            meshRenderer.material.color = originalColor;
+            meshRenderer.material.renderQueue = originalRenderQueue; // Reset sorting
+        }
+
+        MoveAndAlign(true);
+
         if (IsValidPlacement())
         {
             if (currentSurface == null)
@@ -88,16 +113,38 @@ public class DraggableItem : MonoBehaviour
     {
         if (isDragging)
         {
-            MoveAndAlign();
+            MoveAndAlign(false);
 
             if (currentSurface != null && currentSurface.CompareTag("Floor"))
             {
                 if (Input.GetMouseButtonDown(1)) transform.Rotate(0, 90, 0);
             }
+
+            UpdateVisuals();
         }
     }
 
-    void MoveAndAlign()
+    void UpdateVisuals()
+    {
+        if (meshRenderer == null) return;
+
+        if (IsValidPlacement() || currentSurface == null)
+        {
+            Color transparentColor = originalColor;
+            transparentColor.a = 0.5f;
+            meshRenderer.material.color = transparentColor;
+            meshRenderer.material.renderQueue = originalRenderQueue;
+        }
+        else
+        {
+            Color invalidColor = Color.red;
+            invalidColor.a = 0.5f;
+            meshRenderer.material.color = invalidColor;
+            meshRenderer.material.renderQueue = ((int) RenderQueue.Geometry) + 2;
+        }
+    }
+
+    void MoveAndAlign(bool isPlacing)
     {
         if (cam == null) return;
 
@@ -111,17 +158,14 @@ public class DraggableItem : MonoBehaviour
         {
             if (hit.collider.gameObject == gameObject) continue;
 
+            if (placementType == PlacementType.FloorOnly && hit.collider.CompareTag("Wall")) continue;
+            if (placementType == PlacementType.WallOnly && hit.collider.CompareTag("Floor")) continue;
+
             if (hit.collider.CompareTag("Wall"))
             {
-                // CHECK 1: Ignore Ceiling/Floor faces of the Wall Cube
                 if (Mathf.Abs(hit.normal.y) > 0.1f) continue;
 
-                // CHECK 2: Ignore Exterior Faces (NEW)
-                // Calculate direction from the hit point TO the center of the room
                 Vector3 directionToRoom = roomCenter - hit.point;
-
-                // If the normal and the direction to room are pointing in opposite ways (Dot < 0),
-                // it means this face is looking AWAY from the center (Exterior). Skip it.
                 if (Vector3.Dot(hit.normal, directionToRoom) < 0) continue;
 
                 currentSurface = hit.collider.gameObject;
@@ -129,6 +173,7 @@ public class DraggableItem : MonoBehaviour
 
                 Vector3 targetPos = hit.point + (hit.normal * dynamicWallOffset);
                 transform.rotation = Quaternion.LookRotation(hit.normal);
+
                 Vector3 snappedPos = SnapToWallGrid(targetPos, hit.normal);
                 transform.position = ClampToSurfaceBounds(snappedPos, currentSurface);
                 break;
@@ -144,6 +189,7 @@ public class DraggableItem : MonoBehaviour
 
                 Vector3 targetPos = new Vector3(x, hit.point.y + floorLift, z);
                 transform.rotation = Quaternion.Euler(0, transform.eulerAngles.y, 0);
+
                 transform.position = ClampToSurfaceBounds(targetPos, currentSurface);
                 break;
             }
@@ -160,7 +206,7 @@ public class DraggableItem : MonoBehaviour
 
     bool IsValidPlacement()
     {
-        if (currentSurface == null) return true;
+        if (currentSurface == null) return false;
 
         bool onFloor = currentSurface.CompareTag("Floor");
         bool onWall = currentSurface.CompareTag("Wall");
@@ -234,8 +280,8 @@ public class DraggableItem : MonoBehaviour
     {
         float cx = calculatedOffset.x; float cz = calculatedOffset.z;
         int angle = Mathf.RoundToInt(transform.eulerAngles.y);
-        angle = angle % 360; if(angle < 0) angle += 360;
-        
+        angle = angle % 360; if (angle < 0) angle += 360;
+
         if (Mathf.Abs(angle - 90) < 1 || Mathf.Abs(angle - 270) < 1) { cx = calculatedOffset.z; cz = calculatedOffset.x; }
         return new Vector3(cx, 0, cz);
     }

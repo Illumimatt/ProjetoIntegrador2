@@ -274,6 +274,7 @@ MonoBehaviour:
   placementType: 1
   gridSize: 1
   floorLift: 0.5
+  roomCenter: {x: 0, y: 0, z: 0}
 --- !u!1 &40282022
 GameObject:
   m_ObjectHideFlags: 0
@@ -418,6 +419,7 @@ MonoBehaviour:
   placementType: 1
   gridSize: 1
   floorLift: 0.5
+  roomCenter: {x: 0, y: 0, z: 0}
 --- !u!54 &93799879
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1015,6 +1017,7 @@ MonoBehaviour:
   placementType: 0
   gridSize: 1
   floorLift: 0.5
+  roomCenter: {x: 0, y: 0, z: 0}
 --- !u!1 &325966106
 GameObject:
   m_ObjectHideFlags: 0
@@ -1066,6 +1069,7 @@ MonoBehaviour:
   placementType: 1
   gridSize: 1
   floorLift: 0.5
+  roomCenter: {x: 0, y: 0, z: 0}
 --- !u!54 &325966109
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2064,6 +2068,7 @@ MonoBehaviour:
   placementType: 0
   gridSize: 1
   floorLift: 0.5
+  roomCenter: {x: 0, y: 0, z: 0}
 --- !u!1 &993124027
 GameObject:
   m_ObjectHideFlags: 0
@@ -2218,6 +2223,7 @@ MonoBehaviour:
   placementType: 1
   gridSize: 1
   floorLift: 0.5
+  roomCenter: {x: 0, y: 0, z: 0}
 --- !u!54 &1039725589
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2796,7 +2802,7 @@ Transform:
   m_GameObject: {fileID: 1536107436}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3, y: 0, z: -18}
+  m_LocalPosition: {x: 3, y: 0, z: -18.49}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2817,6 +2823,7 @@ MonoBehaviour:
   placementType: 0
   gridSize: 1
   floorLift: 0.5
+  roomCenter: {x: 0, y: 0, z: 0}
 --- !u!54 &1536107439
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2972,6 +2979,7 @@ MonoBehaviour:
   placementType: 1
   gridSize: 1
   floorLift: 0.5
+  roomCenter: {x: 0, y: 0, z: 0}
 --- !u!54 &1751325562
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -3127,6 +3135,7 @@ MonoBehaviour:
   placementType: 1
   gridSize: 1
   floorLift: 0.5
+  roomCenter: {x: 0, y: 0, z: 0}
 --- !u!54 &1762440541
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -3386,6 +3395,7 @@ MonoBehaviour:
   placementType: 0
   gridSize: 1
   floorLift: 0
+  roomCenter: {x: 0, y: 0, z: 0}
 --- !u!1 &1808434100
 GameObject:
   m_ObjectHideFlags: 0
