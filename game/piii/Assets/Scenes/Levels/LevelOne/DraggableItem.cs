@@ -10,7 +10,7 @@ public class DraggableItem : MonoBehaviour
 
     [Header("Grid Settings")]
     public float gridSize = 1.0f;
-    public float floorLift = 0.5f;
+    public float floorLift = 1.0f;
 
     // We calculate these automatically now
     private Vector3 calculatedOffset;
