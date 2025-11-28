@@ -17,6 +17,10 @@ public class DraggableItem : MonoBehaviour
     private float dynamicWallOffset;
 
     // --- INTERNAL VARIABLES ---
+
+    private Vector3 initialPosition;
+    private Quaternion initialRotation;
+
     private bool isDragging = false;
     private Vector3 originalPosition;
     private Quaternion originalRotation;
@@ -52,6 +56,9 @@ public class DraggableItem : MonoBehaviour
         );
 
         dynamicWallOffset = transform.localScale.z / 2.0f;
+
+        initialPosition = transform.position;
+        initialRotation = transform.rotation;
     }
 
     void OnMouseDown()
@@ -67,8 +74,13 @@ public class DraggableItem : MonoBehaviour
 
         if (IsValidPlacement())
         {
-            originalPosition = transform.position;
-            originalRotation = transform.rotation;
+            if (currentSurface == null) {
+                transform.position = initialPosition;
+                transform.rotation = initialRotation;
+            } else {
+                originalPosition = transform.position;
+                originalRotation = transform.rotation;
+            }
         }
         else
         {
@@ -191,7 +203,7 @@ public class DraggableItem : MonoBehaviour
 
     bool IsValidPlacement()
     {
-        if (currentSurface == null) return false;
+        if (currentSurface == null) return true;
 
         bool onFloor = currentSurface.CompareTag("Floor");
         bool onWall = currentSurface.CompareTag("Wall");
