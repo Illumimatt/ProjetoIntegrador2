@@ -16,6 +16,7 @@ public class DraggableItem : MonoBehaviour
 
     [Header("Room Logic")]
     public Vector3 roomCenter = Vector3.zero;
+    public bool IsPlaced { get; private set; } = false;
 
     // --- VISUALS ---
     private MeshRenderer meshRenderer;
@@ -71,6 +72,7 @@ public class DraggableItem : MonoBehaviour
     void OnMouseDown()
     {
         isDragging = true;
+        IsPlaced = false;
         originalPosition = transform.position;
         originalRotation = transform.rotation;
     }
@@ -99,6 +101,8 @@ public class DraggableItem : MonoBehaviour
             {
                 originalPosition = transform.position;
                 originalRotation = transform.rotation;
+                IsPlaced = true;
+                FindObjectOfType<LevelController>()?.CheckLevelCompletion();
             }
         }
         else
@@ -206,7 +210,7 @@ public class DraggableItem : MonoBehaviour
 
     bool IsValidPlacement()
     {
-        if (currentSurface == null) return false;
+        if (currentSurface == null) return true;
 
         bool onFloor = currentSurface.CompareTag("Floor");
         bool onWall = currentSurface.CompareTag("Wall");
